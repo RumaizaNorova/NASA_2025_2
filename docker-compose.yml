@@ -1,0 +1,59 @@
+services:
+  backend:
+    build: 
+      context: .
+      dockerfile: backend/Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - MAPBOX_PUBLIC_TOKEN=${MAPBOX_PUBLIC_TOKEN}
+      - EARTHDATA_TOKEN=${EARTHDATA_TOKEN}
+      - EARTHDATA_USERNAME=${EARTHDATA_USERNAME}
+      - EARTHDATA_PASSWORD=${EARTHDATA_PASSWORD}
+    volumes:
+      - ./results_full:/app/results_full:ro
+      - ./integrated_data_full.csv:/app/integrated_data_full.csv:ro
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    ports:
+      - "3000:80"
+    environment:
+      - REACT_APP_API_URL=http://backend:8000
+      - REACT_APP_MAPBOX_TOKEN=${MAPBOX_PUBLIC_TOKEN}
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+
+  # Optional: Add a reverse proxy
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - backend
+      - frontend
+    restart: unless-stopped
+
+volumes:
+  model_data:
+    driver: local

@@ -1,0 +1,17 @@
+[build]
+  command = "cd frontend && npm install && npm run build"
+  publish = "frontend/build"
+
+[build.environment]
+  NODE_VERSION = "16"
+
+[[redirects]]
+  from = "/api/*"
+  to = "https://shark-habitat-backend.onrender.com/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
