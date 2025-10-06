@@ -8,7 +8,11 @@ import {
   Zap, 
   Target,
   Clock,
-  MapPin
+  MapPin,
+  X,
+  ChevronLeft,
+  Globe,
+  Map
 } from 'lucide-react';
 
 const MapControls = ({
@@ -20,7 +24,12 @@ const MapControls = ({
   setIsAnimating,
   animationSpeed,
   setAnimationSpeed,
-  sharkTracks
+  sharkTracks,
+  onClose,
+  currentFrame,
+  totalFrames,
+  mapStyle,
+  setMapStyle
 }) => {
   // Get unique species from tracks
   const species = [...new Set(sharkTracks.map(track => track.species))];
@@ -28,9 +37,18 @@ const MapControls = ({
   return (
     <div className="glass-card rounded-xl p-4 space-y-4">
       {/* Header */}
-      <div className="flex items-center space-x-2">
-        <Target className="w-5 h-5 text-ocean-400" />
-        <h3 className="text-white font-semibold">Map Controls</h3>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-2">
+          <Target className="w-5 h-5 text-ocean-400" />
+          <h3 className="text-white font-semibold">Map Controls</h3>
+        </div>
+        <button
+          onClick={onClose}
+          className="p-1 hover:bg-shark-700/50 rounded-lg transition-colors text-shark-400 hover:text-white"
+          title="Hide controls"
+        >
+          <X className="w-4 h-4" />
+        </button>
       </div>
 
       {/* Species Filter */}
@@ -46,6 +64,35 @@ const MapControls = ({
             <option key={spec} value={spec}>{spec}</option>
           ))}
         </select>
+      </div>
+
+      {/* Map Style Selector */}
+      <div className="space-y-2">
+        <label className="text-sm text-ocean-300 font-medium">Map Style</label>
+        <div className="grid grid-cols-2 gap-2">
+          <button
+            onClick={() => setMapStyle('satellite')}
+            className={`p-2 rounded-lg text-xs transition-colors flex items-center justify-center space-x-1 ${
+              mapStyle === 'satellite' 
+                ? 'bg-ocean-500 text-white' 
+                : 'bg-shark-700/50 text-ocean-300 hover:bg-shark-600/50'
+            }`}
+          >
+            <Map className="w-3 h-3" />
+            <span>Map View</span>
+          </button>
+          <button
+            onClick={() => setMapStyle('map')}
+            className={`p-2 rounded-lg text-xs transition-colors flex items-center justify-center space-x-1 ${
+              mapStyle === 'map' 
+                ? 'bg-ocean-500 text-white' 
+                : 'bg-shark-700/50 text-ocean-300 hover:bg-shark-600/50'
+            }`}
+          >
+            <Globe className="w-3 h-3" />
+            <span>Earth View</span>
+          </button>
+        </div>
       </div>
 
       {/* Prediction Toggle */}
@@ -87,40 +134,52 @@ const MapControls = ({
           </button>
         </div>
 
-        {/* Animation Speed */}
-        {isAnimating && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            className="space-y-2"
-          >
+        {/* Animation Speed - Always visible */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
             <label className="text-sm text-ocean-300 font-medium">Speed</label>
-            <input
-              type="range"
-              min="500"
-              max="3000"
-              step="100"
-              value={animationSpeed}
-              onChange={(e) => setAnimationSpeed(Number(e.target.value))}
-              className="w-full h-2 bg-shark-700 rounded-lg appearance-none cursor-pointer slider"
-            />
-            <div className="flex justify-between text-xs text-ocean-400">
-              <span>Slow</span>
-              <span>Fast</span>
+            <span className="text-xs text-ocean-400">{animationSpeed}/30</span>
+          </div>
+          <input
+            type="range"
+            min="1"
+            max="30"
+            step="1"
+            value={animationSpeed}
+            onChange={(e) => setAnimationSpeed(Number(e.target.value))}
+            className="w-full h-2 bg-shark-700 rounded-lg appearance-none cursor-pointer slider"
+          />
+          <div className="flex justify-between text-xs text-ocean-400">
+            <span>Slow</span>
+            <span className="text-red-400 font-semibold">Very Fast</span>
+          </div>
+          
+          {/* Animation Progress */}
+          {isAnimating && totalFrames > 0 && (
+            <div className="text-xs text-ocean-400 text-center pt-2 border-t border-shark-700">
+              <div className="mb-2">
+                <Clock className="w-3 h-3 inline mr-1" />
+                Frame {currentFrame + 1} / {totalFrames}
+              </div>
+              <div className="w-full bg-shark-700 rounded-full h-2">
+                <div 
+                  className="bg-ocean-500 h-2 rounded-full transition-all duration-200"
+                  style={{ width: `${((currentFrame + 1) / totalFrames) * 100}%` }}
+                />
+              </div>
             </div>
-          </motion.div>
-        )}
+          )}
+        </div>
       </div>
 
       {/* Reset View */}
       <button
         onClick={() => {
-          // Reset to default view
+          // Reset to global view
           if (window.mapRef?.current) {
             window.mapRef.current.flyTo({
-              center: [-80.0, 30.0],
-              zoom: 6,
+              center: [0.0, 0.0],
+              zoom: 2,
               duration: 1000
             });
           }
@@ -149,6 +208,21 @@ const MapControls = ({
         </div>
       </div>
 
+      {/* Legend */}
+      <div className="pt-3 border-t border-shark-700">
+        <div className="text-xs text-ocean-300 font-medium mb-2">Shark Behavior</div>
+        <div className="space-y-2">
+          <div className="flex items-center space-x-2">
+            <div className="w-3 h-3 bg-red-500 rounded-full border border-white"></div>
+            <span className="text-xs text-ocean-400">Foraging</span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <div className="w-3 h-3 bg-blue-500 rounded-full border border-white"></div>
+            <span className="text-xs text-ocean-400">Not Foraging</span>
+          </div>
+        </div>
+      </div>
+
       {/* Instructions */}
       <div className="pt-3 border-t border-shark-700">
         <div className="text-xs text-ocean-400 space-y-1">
@@ -167,4 +241,3 @@ const MapControls = ({
 };
 
 export default MapControls;
-

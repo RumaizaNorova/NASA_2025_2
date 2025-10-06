@@ -1,11 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useShark } from '../context/SharkContext';
-import PerformanceChart from './charts/PerformanceChart';
-import SpeciesDistribution from './charts/SpeciesDistribution';
-import TemporalAnalysis from './charts/TemporalAnalysis';
-import FeatureImportance from './charts/FeatureImportance';
-import DatasetStats from './charts/DatasetStats';
 import { 
   BarChart3, 
   PieChart, 
@@ -14,7 +9,8 @@ import {
   Activity,
   Calendar,
   Fish,
-  Zap
+  Zap,
+  AlertCircle
 } from 'lucide-react';
 
 const Dashboard = () => {
@@ -28,14 +24,12 @@ const Dashboard = () => {
   } = useShark();
 
   const [activeTab, setActiveTab] = useState('overview');
-  const [selectedMetric, setSelectedMetric] = useState('auc_score');
 
   const tabs = [
     { id: 'overview', label: 'Overview', icon: BarChart3 },
     { id: 'performance', label: 'Model Performance', icon: TrendingUp },
     { id: 'species', label: 'Species Analysis', icon: Fish },
     { id: 'temporal', label: 'Temporal Analysis', icon: Calendar },
-    { id: 'features', label: 'Feature Importance', icon: Target },
   ];
 
   if (loading) {
@@ -54,7 +48,7 @@ const Dashboard = () => {
       <div className="flex items-center justify-center h-full">
         <div className="text-center">
           <div className="w-12 h-12 bg-red-600/20 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Activity className="w-6 h-6 text-red-400" />
+            <AlertCircle className="w-6 h-6 text-red-400" />
           </div>
           <p className="text-red-400">Error loading dashboard: {error}</p>
         </div>
@@ -179,45 +173,121 @@ const Dashboard = () => {
         >
           {activeTab === 'overview' && (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <DatasetStats stats={stats} />
-              <SpeciesDistribution 
-                species={species} 
-                speciesDistribution={stats?.species_distribution}
-                foragingDistribution={stats?.foraging_distribution}
-              />
+              <div className="glass-card rounded-xl p-6">
+                <h3 className="text-white font-semibold mb-4">Dataset Overview</h3>
+                <div className="space-y-4">
+                  <div className="flex justify-between">
+                    <span className="text-ocean-300">Total Records:</span>
+                    <span className="text-white">{stats?.total_records?.toLocaleString() || '0'}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-ocean-300">Unique Sharks:</span>
+                    <span className="text-white">{stats?.unique_sharks || '0'}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-ocean-300">Species Count:</span>
+                    <span className="text-white">{stats?.species_count || '0'}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-ocean-300">Date Range:</span>
+                    <span className="text-white text-sm">
+                      {stats?.date_range?.start ? new Date(stats.date_range.start).getFullYear() : 'N/A'} - 
+                      {stats?.date_range?.end ? new Date(stats.date_range.end).getFullYear() : 'N/A'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="glass-card rounded-xl p-6">
+                <h3 className="text-white font-semibold mb-4">Foraging Distribution</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-4 bg-red-600/20 border border-red-500/30 rounded-lg">
+                    <div className="flex items-center space-x-2 mb-2">
+                      <Activity className="w-4 h-4 text-red-400" />
+                      <span className="text-red-400 font-medium">Foraging</span>
+                    </div>
+                    <div className="text-2xl font-bold text-red-400">
+                      {stats?.foraging_distribution?.foraging?.toLocaleString() || '0'}
+                    </div>
+                  </div>
+                  
+                  <div className="p-4 bg-green-600/20 border border-green-500/30 rounded-lg">
+                    <div className="flex items-center space-x-2 mb-2">
+                      <TrendingUp className="w-4 h-4 text-green-400" />
+                      <span className="text-green-400 font-medium">Not Foraging</span>
+                    </div>
+                    <div className="text-2xl font-bold text-green-400">
+                      {stats?.foraging_distribution?.not_foraging?.toLocaleString() || '0'}
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
 
           {activeTab === 'performance' && (
-            <div className="space-y-8">
-              <PerformanceChart 
-                modelPerformance={modelPerformance}
-                selectedMetric={selectedMetric}
-                setSelectedMetric={setSelectedMetric}
-              />
+            <div className="glass-card rounded-xl p-6">
+              <h3 className="text-white font-semibold mb-4">Model Performance</h3>
+              {modelPerformance && modelPerformance.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {modelPerformance.map((model, index) => (
+                    <div key={index} className="p-4 bg-shark-700/30 rounded-lg">
+                      <h4 className="text-white font-medium mb-2">{model.model_name}</h4>
+                      <div className="space-y-2 text-sm">
+                        <div className="flex justify-between">
+                          <span className="text-ocean-300">AUC Score:</span>
+                          <span className="text-white">{model.auc_score.toFixed(3)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-ocean-300">Accuracy:</span>
+                          <span className="text-white">{(model.accuracy * 100).toFixed(1)}%</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-ocean-300">Precision:</span>
+                          <span className="text-white">{(model.precision * 100).toFixed(1)}%</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-ocean-300">Recall:</span>
+                          <span className="text-white">{(model.recall * 100).toFixed(1)}%</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-ocean-300">F1 Score:</span>
+                          <span className="text-white">{(model.f1_score * 100).toFixed(1)}%</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-ocean-300">No model performance data available</p>
+              )}
             </div>
           )}
 
           {activeTab === 'species' && (
-            <div className="space-y-8">
-              <SpeciesDistribution 
-                species={species} 
-                speciesDistribution={stats?.species_distribution}
-                foragingDistribution={stats?.foraging_distribution}
-                detailed={true}
-              />
+            <div className="glass-card rounded-xl p-6">
+              <h3 className="text-white font-semibold mb-4">Species Analysis</h3>
+              {stats?.species_distribution ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {Object.entries(stats.species_distribution).map(([species, count]) => (
+                    <div key={species} className="p-3 bg-shark-700/30 rounded-lg">
+                      <div className="flex justify-between items-center">
+                        <span className="text-white font-medium">{species}</span>
+                        <span className="text-ocean-400">{count.toLocaleString()}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-ocean-300">No species data available</p>
+              )}
             </div>
           )}
 
           {activeTab === 'temporal' && (
-            <div className="space-y-8">
-              <TemporalAnalysis sharkTracks={sharkTracks} />
-            </div>
-          )}
-
-          {activeTab === 'features' && (
-            <div className="space-y-8">
-              <FeatureImportance />
+            <div className="glass-card rounded-xl p-6">
+              <h3 className="text-white font-semibold mb-4">Temporal Analysis</h3>
+              <p className="text-ocean-300">Temporal analysis features coming soon...</p>
             </div>
           )}
         </motion.div>
@@ -227,4 +297,3 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
-

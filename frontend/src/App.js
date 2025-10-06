@@ -6,10 +6,12 @@ import Navigation from './components/Navigation';
 import LoadingScreen from './components/LoadingScreen';
 import { SharkProvider } from './context/SharkContext';
 import { ApiProvider } from './context/ApiContext';
+import './App.css';
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [currentView, setCurrentView] = useState('map');
+  const [showAIChat, setShowAIChat] = useState(false);
 
   useEffect(() => {
     // Simulate loading time for smooth UX
@@ -30,11 +32,16 @@ function App() {
         <div className="min-h-screen bg-gradient-to-br from-shark-950 via-ocean-950 to-shark-900">
           {/* Background pattern */}
           <div className="fixed inset-0 opacity-5">
-            <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="0.1"%3E%3Ccircle cx="30" cy="30" r="2"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')]"></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent"></div>
           </div>
 
           {/* Navigation */}
-          <Navigation currentView={currentView} setCurrentView={setCurrentView} />
+          <Navigation 
+            currentView={currentView} 
+            setCurrentView={setCurrentView}
+            showAIChat={showAIChat}
+            setShowAIChat={setShowAIChat}
+          />
 
           {/* Main Content */}
           <main className="relative z-10">
@@ -70,9 +77,20 @@ function App() {
           {/* Footer */}
           <footer className="fixed bottom-0 left-0 right-0 z-20 p-4">
             <div className="text-center text-sm text-ocean-300 opacity-70">
-              <p>🦈 Shark Habitat Prediction Dashboard | NASA Data Integration | AUC: 0.972</p>
+              <p>🦈 Shark Habitat Prediction Dashboard | NASA Data Integration | GradientBoosting Model AUC: 0.972</p>
             </div>
           </footer>
+
+          {/* Circular AI Assistant Indicator */}
+          <motion.button
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 1, duration: 0.5 }}
+            onClick={() => setShowAIChat(true)}
+            className="fixed bottom-6 right-6 z-30 w-14 h-14 bg-gradient-to-br from-purple-600 to-pink-600 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 border-2 border-purple-400/30"
+          >
+            <span className="text-2xl">🤖</span>
+          </motion.button>
         </div>
       </SharkProvider>
     </ApiProvider>
@@ -80,4 +98,3 @@ function App() {
 }
 
 export default App;
-

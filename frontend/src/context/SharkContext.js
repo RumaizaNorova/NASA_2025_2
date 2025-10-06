@@ -70,10 +70,22 @@ export function SharkProvider({ children }) {
       
       // Load data in parallel
       const [tracks, performance, species, stats] = await Promise.all([
-        apiService.getSharkTracks({ limit: 1000 }),
-        apiService.getModelPerformance(),
-        apiService.getSpecies(),
-        apiService.getStats()
+        apiService.getSharkTracks({ limit: 1000 }).catch(err => {
+          console.warn('Failed to load shark tracks:', err);
+          return [];
+        }),
+        apiService.getModelPerformance().catch(err => {
+          console.warn('Failed to load model performance:', err);
+          return [];
+        }),
+        apiService.getSpecies().catch(err => {
+          console.warn('Failed to load species:', err);
+          return { species: [] };
+        }),
+        apiService.getStats().catch(err => {
+          console.warn('Failed to load stats:', err);
+          return null;
+        })
       ]);
       
       dispatch({ type: 'SET_SHARK_TRACKS', payload: tracks });
@@ -82,6 +94,7 @@ export function SharkProvider({ children }) {
       dispatch({ type: 'SET_STATS', payload: stats });
       
     } catch (error) {
+      console.error('Error loading initial data:', error);
       dispatch({ type: 'SET_ERROR', payload: error.message });
     }
   };
@@ -132,4 +145,3 @@ export function useShark() {
   }
   return context;
 }
-

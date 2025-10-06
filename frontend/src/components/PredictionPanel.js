@@ -3,6 +3,34 @@ import { motion } from 'framer-motion';
 import { X, Zap, Target, TrendingUp, AlertCircle } from 'lucide-react';
 
 const PredictionPanel = ({ prediction, onClose }) => {
+  if (!prediction) return null;
+
+  // Handle error case
+  if (prediction.error) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.9 }}
+        className="glass-card rounded-xl p-4 space-y-4"
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <AlertCircle className="w-5 h-5 text-red-400" />
+            <h3 className="text-white font-semibold">Prediction Error</h3>
+          </div>
+          <button
+            onClick={onClose}
+            className="p-1 hover:bg-shark-700/50 rounded-lg transition-colors"
+          >
+            <X className="w-4 h-4 text-ocean-400" />
+          </button>
+        </div>
+        <p className="text-red-300 text-sm">{prediction.error}</p>
+      </motion.div>
+    );
+  }
+
   const { foraging_probability, confidence, prediction: pred, features_used, model_info, location } = prediction;
 
   // Determine prediction color and text
@@ -161,4 +189,3 @@ const PredictionPanel = ({ prediction, onClose }) => {
 };
 
 export default PredictionPanel;
-

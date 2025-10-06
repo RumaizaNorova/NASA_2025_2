@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Send, Bot, User, Loader, Sparkles, FileText, HelpCircle } from 'lucide-react';
 import { apiService } from '../services/apiService';
 
-const OpenAIChat = ({ onClose, predictionData, sharkData }) => {
+const OpenAIChat = ({ onClose }) => {
   const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -48,25 +48,25 @@ const OpenAIChat = ({ onClose, predictionData, sharkData }) => {
       switch (chatMode) {
         case 'insights':
           response = await apiService.generateInsights({
-            prediction_data: predictionData,
-            shark_data: sharkData
+            prediction_data: { /* Add current prediction data */ },
+            shark_data: { /* Add current shark data */ }
           });
           break;
         case 'report':
           response = await apiService.generateReport({
             analysis_data: {
               model_performance: { /* Add model performance data */ },
-              dataset_stats: sharkData,
+              dataset_stats: { /* Add dataset stats */ },
               feature_importance: { /* Add feature importance data */ },
               temporal_analysis: { /* Add temporal analysis data */ },
-              species_distribution: sharkData?.species_distribution
+              species_distribution: { /* Add species distribution */ }
             }
           });
           break;
         default:
           response = await apiService.askQuestion({
             question: inputValue.trim(),
-            context_data: sharkData
+            context_data: { /* Add context data */ }
           });
       }
 
@@ -269,4 +269,3 @@ const OpenAIChat = ({ onClose, predictionData, sharkData }) => {
 };
 
 export default OpenAIChat;
-

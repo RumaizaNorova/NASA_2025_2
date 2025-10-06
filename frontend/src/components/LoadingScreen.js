@@ -30,7 +30,7 @@ const LoadingScreen = () => {
           transition={{ delay: 0.4, duration: 0.5 }}
           className="text-ocean-300 text-lg mb-8"
         >
-          Loading NASA satellite data and trained models...
+          Loading NASA satellite data and trained GradientBoosting model...
         </motion.p>
         
         <motion.div
@@ -49,6 +49,7 @@ const LoadingScreen = () => {
           <p>🦈 64,942 shark tracking records</p>
           <p>📡 MODIS-Aqua satellite data</p>
           <p>🤖 GradientBoosting model (AUC: 0.972)</p>
+          <p>🎯 92.9% accuracy on test data</p>
         </motion.div>
       </div>
     </div>
@@ -56,4 +57,3 @@ const LoadingScreen = () => {
 };
 
 export default LoadingScreen;
-

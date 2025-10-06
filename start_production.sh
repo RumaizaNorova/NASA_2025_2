@@ -61,3 +61,4 @@ echo "📊 To view logs: docker-compose logs -f"
 echo "🛑 To stop: docker-compose down"
 echo ""
 
+

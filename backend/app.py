@@ -3,7 +3,7 @@ FastAPI Backend for Shark Habitat Prediction Dashboard
 Provides API endpoints for model predictions and data access
 """
 
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
@@ -16,6 +16,8 @@ from typing import List, Optional, Dict, Any
 import logging
 from dotenv import load_dotenv
 from openai_service import openai_service
+import json
+from pathlib import Path
 
 # Load environment variables
 load_dotenv()
@@ -28,13 +30,18 @@ logger = logging.getLogger(__name__)
 app = FastAPI(
     title="Shark Habitat Prediction API",
     description="API for predicting shark foraging behavior using satellite data",
-    version="1.0.0"
+    version="2.0.0"
 )
 
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Configure appropriately for production
+    allow_origins=[
+        "http://localhost:3000",
+        "http://localhost:3001", 
+        "http://127.0.0.1:3000",
+        "http://127.0.0.1:3001"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -45,6 +52,7 @@ model = None
 scaler = None
 feature_columns = None
 shark_data = None
+model_performance = None
 
 # Pydantic models for request/response
 class PredictionRequest(BaseModel):
@@ -93,60 +101,70 @@ class QuestionRequest(BaseModel):
 class ReportRequest(BaseModel):
     analysis_data: Dict[str, Any]
 
+def load_model():
+    """Load the trained GradientBoosting model"""
+    global model, model_performance
+    
+    model_path = "../results_full/models/gradientboosting_model.pkl"
+    
+    if not os.path.exists(model_path):
+        raise FileNotFoundError(f"Model file not found: {model_path}. Please ensure the trained model is available.")
+    
+    try:
+        model = joblib.load(model_path)
+        logger.info(f"Successfully loaded GradientBoosting model from {model_path}")
+    except Exception as e:
+        raise RuntimeError(f"Failed to load model: {e}")
+    
+    # Load performance data
+    perf_path = "../results_full/model_performance_full.json"
+    
+    if not os.path.exists(perf_path):
+        raise FileNotFoundError(f"Performance data not found: {perf_path}")
+    
+    try:
+        with open(perf_path, 'r') as f:
+            model_performance = json.load(f)
+        logger.info(f"Successfully loaded performance data from {perf_path}")
+    except Exception as e:
+        raise RuntimeError(f"Failed to load performance data: {e}")
+
+def load_data():
+    """Load shark tracking data"""
+    global shark_data, feature_columns
+    
+    data_path = "../integrated_data_full.csv"
+    
+    if not os.path.exists(data_path):
+        raise FileNotFoundError(f"Data file not found: {data_path}. Please ensure the shark tracking data is available.")
+    
+    try:
+        df = pd.read_csv(data_path)
+        
+        # Get feature columns (exclude target and metadata columns)
+        exclude_cols = ['active', 'datetime', 'id', 'name', 'gender', 'species', 'weight', 
+                       'length', 'tagDate', 'dist_total', 'foraging_behavior', 'foraging']
+        feature_columns = [col for col in df.columns if col not in exclude_cols]
+        
+        # Load a sample of shark data for visualization
+        shark_data = df.sample(min(1000, len(df))).to_dict('records')
+        
+        logger.info(f"Successfully loaded {len(shark_data)} shark track records from {data_path}")
+        logger.info(f"Loaded {len(feature_columns)} feature columns")
+    except Exception as e:
+        raise RuntimeError(f"Failed to load data: {e}")
+
 @app.on_event("startup")
 async def startup_event():
     """Load model and data on startup"""
-    global model, scaler, feature_columns, shark_data
-    
     try:
-        # Load the best model (GradientBoosting)
-        model_path = "./results_full/models/gradientboosting_model.pkl"
-        if os.path.exists(model_path):
-            model = joblib.load(model_path)
-            logger.info(f"Loaded model from {model_path}")
-        else:
-            # Try alternative path
-            alt_model_path = "/app/results_full/models/gradientboosting_model.pkl"
-            if os.path.exists(alt_model_path):
-                model = joblib.load(alt_model_path)
-                logger.info(f"Loaded model from {alt_model_path}")
-            else:
-                logger.error(f"Model file not found: {model_path} or {alt_model_path}")
-                raise FileNotFoundError(f"Model file not found: {model_path} or {alt_model_path}")
-        
-        # Load feature columns (we'll need to reconstruct this from the training data)
-        # For now, we'll use the feature list from the integrated data
-        data_path = "./integrated_data_full.csv"
-        if os.path.exists(data_path):
-            df = pd.read_csv(data_path)
-            # Get feature columns (exclude target and metadata columns)
-            exclude_cols = ['active', 'datetime', 'id', 'name', 'gender', 'species', 'weight', 
-                           'length', 'tagDate', 'dist_total', 'foraging_behavior']
-            feature_columns = [col for col in df.columns if col not in exclude_cols]
-            logger.info(f"Loaded {len(feature_columns)} feature columns")
-            
-            # Load a sample of shark data for visualization
-            shark_data = df.sample(min(1000, len(df))).to_dict('records')
-            logger.info(f"Loaded {len(shark_data)} shark track records")
-        else:
-            # Try alternative path
-            alt_data_path = "/app/integrated_data_full.csv"
-            if os.path.exists(alt_data_path):
-                df = pd.read_csv(alt_data_path)
-                exclude_cols = ['active', 'datetime', 'id', 'name', 'gender', 'species', 'weight', 
-                               'length', 'tagDate', 'dist_total', 'foraging_behavior']
-                feature_columns = [col for col in df.columns if col not in exclude_cols]
-                logger.info(f"Loaded {len(feature_columns)} feature columns")
-                
-                shark_data = df.sample(min(1000, len(df))).to_dict('records')
-                logger.info(f"Loaded {len(shark_data)} shark track records")
-            else:
-                logger.error(f"Data file not found: {data_path} or {alt_data_path}")
-                raise FileNotFoundError(f"Data file not found: {data_path} or {alt_data_path}")
-            
+        logger.info("Starting up Shark Habitat Prediction API...")
+        load_model()
+        load_data()
+        logger.info("Startup completed successfully - Model and data loaded!")
     except Exception as e:
-        logger.error(f"Error during startup: {e}")
-        raise
+        logger.error(f"Critical error during startup: {e}")
+        raise RuntimeError(f"Failed to start API: {e}")
 
 def prepare_features(request: PredictionRequest) -> np.ndarray:
     """Prepare features for prediction from request data"""
@@ -223,13 +241,19 @@ async def root():
     """Root endpoint"""
     return {
         "message": "Shark Habitat Prediction API",
-        "version": "1.0.0",
+        "version": "2.0.0",
         "status": "running",
+        "model_loaded": model is not None,
+        "data_loaded": shark_data is not None,
+        "model_type": "GradientBoosting",
+        "model_auc": 0.9716,
         "endpoints": [
             "/predict",
             "/shark-tracks",
             "/model-performance",
-            "/health"
+            "/health",
+            "/species",
+            "/stats"
         ]
     }
 
@@ -240,7 +264,10 @@ async def health_check():
         "status": "healthy",
         "model_loaded": model is not None,
         "data_loaded": shark_data is not None,
-        "timestamp": datetime.now().isoformat()
+        "model_type": "GradientBoosting",
+        "model_auc": 0.9716,
+        "timestamp": datetime.now().isoformat(),
+        "version": "2.0.0"
     }
 
 @app.post("/predict", response_model=PredictionResponse)
@@ -254,7 +281,7 @@ async def predict_habitat(request: PredictionRequest):
         # Prepare features
         features = prepare_features(request)
         
-        # Make prediction
+        # Make prediction using the trained model
         probability = model.predict_proba(features)[0][1]  # Probability of foraging
         prediction = model.predict(features)[0]
         
@@ -268,8 +295,12 @@ async def predict_habitat(request: PredictionRequest):
             features_used=feature_columns,
             model_info={
                 "model_type": "GradientBoosting",
-                "auc_score": 0.972,
-                "training_samples": 64942
+                "auc_score": 0.9716,
+                "training_samples": 64942,
+                "accuracy": 0.9289,
+                "precision": 0.9338,
+                "recall": 0.9289,
+                "f1_score": 0.9307
             }
         )
         
@@ -333,25 +364,12 @@ async def get_shark_tracks(
 async def get_model_performance():
     """Get model performance metrics"""
     
+    if model_performance is None:
+        raise HTTPException(status_code=500, detail="Performance data not loaded")
+    
     try:
-        # Load performance data
-        perf_path = "./results_full/model_performance_full.json"
-        if os.path.exists(perf_path):
-            import json
-            with open(perf_path, 'r') as f:
-                perf_data = json.load(f)
-        else:
-            # Try alternative path
-            alt_perf_path = "/app/results_full/model_performance_full.json"
-            if os.path.exists(alt_perf_path):
-                import json
-                with open(alt_perf_path, 'r') as f:
-                    perf_data = json.load(f)
-            else:
-                raise HTTPException(status_code=404, detail="Performance data not found")
-        
         performance = []
-        for model_name, metrics in perf_data.items():
+        for model_name, metrics in model_performance.items():
             if 'classification_report' in metrics:
                 report = metrics['classification_report']
                 performance.append(ModelPerformance(

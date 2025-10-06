@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   backend:
     build: 
@@ -12,8 +14,10 @@ services:
       - EARTHDATA_USERNAME=${EARTHDATA_USERNAME}
       - EARTHDATA_PASSWORD=${EARTHDATA_PASSWORD}
     volumes:
+      # Mount the trained models and data
       - ./results_full:/app/results_full:ro
       - ./integrated_data_full.csv:/app/integrated_data_full.csv:ro
+      - ./sharks_cleaned.csv:/app/sharks_cleaned.csv:ro
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
@@ -29,7 +33,7 @@ services:
     ports:
       - "3000:80"
     environment:
-      - REACT_APP_API_URL=http://backend:8000
+      - REACT_APP_API_URL=http://localhost:8000
       - REACT_APP_MAPBOX_TOKEN=${MAPBOX_PUBLIC_TOKEN}
     depends_on:
       backend:
@@ -40,18 +44,6 @@ services:
       timeout: 10s
       retries: 5
       start_period: 30s
-    restart: unless-stopped
-
-  # Optional: Add a reverse proxy
-  nginx:
-    image: nginx:alpine
-    ports:
-      - "80:80"
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
-    depends_on:
-      - backend
-      - frontend
     restart: unless-stopped
 
 volumes:

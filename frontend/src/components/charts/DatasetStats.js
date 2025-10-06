@@ -151,11 +151,14 @@ const DatasetStats = ({ stats }) => {
             <TrendingUp className="w-4 h-4 text-ocean-400" />
           </div>
           <div>
-            <h3 className="text-white font-semibold mb-2">Model Performance Summary</h3>
+            <h3 className="text-white font-semibold mb-2">Trained Model Performance</h3>
             <div className="text-sm text-ocean-300 space-y-1">
               <p>• <strong>Best Model:</strong> GradientBoosting Classifier</p>
               <p>• <strong>AUC Score:</strong> 0.972 (Excellent)</p>
               <p>• <strong>Accuracy:</strong> 92.9%</p>
+              <p>• <strong>Precision:</strong> 93.4%</p>
+              <p>• <strong>Recall:</strong> 92.9%</p>
+              <p>• <strong>F1-Score:</strong> 93.1%</p>
               <p>• <strong>Training Samples:</strong> 64,942 records</p>
               <p>• <strong>Validation:</strong> Temporal splitting, no data leakage</p>
             </div>
@@ -167,4 +170,3 @@ const DatasetStats = ({ stats }) => {
 };
 
 export default DatasetStats;
-
