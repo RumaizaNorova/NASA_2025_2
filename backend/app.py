@@ -15,8 +15,8 @@ from datetime import datetime, timedelta
 from typing import List, Optional, Dict, Any
 import logging
 from dotenv import load_dotenv
-from openai_service import openai_service
-from satellite_service import get_satellite_service
+from .openai_service import openai_service
+from .satellite_service import get_satellite_service
 import json
 from pathlib import Path
 
