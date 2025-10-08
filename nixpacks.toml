@@ -12,4 +12,4 @@ cmds = [
 cmds = ["echo 'Building backend...'"]
 
 [start]
-cmd = "cd /app/backend && /opt/venv/bin/python -m uvicorn app:app --host 0.0.0.0 --port $PORT --workers 1"
+cmd = "cd /app/backend && PYTHONPATH=. /opt/venv/bin/python -m uvicorn app:app --host 0.0.0.0 --port $PORT --workers 1"
