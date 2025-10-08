@@ -10,3 +10,5 @@ python-multipart>=0.0.6
 openai>=1.0.0
 requests>=2.31.0
 aiofiles>=23.0.0
+xarray>=2023.0.0
+scipy>=1.9.0
