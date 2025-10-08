@@ -3,6 +3,12 @@ FastAPI Backend for Shark Habitat Prediction Dashboard
 Provides API endpoints for model predictions and data access
 """
 
+# Fix import path - ensure current directory is in sys.path
+import sys
+import os
+if os.path.dirname(__file__) not in sys.path:
+    sys.path.insert(0, os.path.dirname(__file__))
+
 from fastapi import FastAPI, HTTPException, Query, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -10,7 +16,6 @@ from pydantic import BaseModel
 import pandas as pd
 import numpy as np
 import joblib
-import os
 from datetime import datetime, timedelta
 from typing import List, Optional, Dict, Any
 import logging
