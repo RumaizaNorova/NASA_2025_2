@@ -46,11 +46,16 @@ app.add_middleware(
         "http://localhost:3000",
         "http://localhost:3001", 
         "http://127.0.0.1:3000",
-        "http://127.0.0.1:3001"
+        "http://127.0.0.1:3001",
+        # Allow Railway domains (production)
+        "https://*.railway.app",
+        "https://*.up.railway.app",
     ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    # For Railway wildcard domains, we need to use origin regex
+    allow_origin_regex=r"https://.*\.railway\.app|https://.*\.up\.railway\.app",
 )
 
 # Global variables for model and data
