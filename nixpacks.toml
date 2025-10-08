@@ -1,8 +1,12 @@
-[providers]
-python = "3.9"
+[phases.setup]
+nixPkgs = ["python39", "python39Packages.pip", "python39Packages.setuptools"]
 
 [phases.install]
-cmds = ["pip install -r backend/requirements.txt"]
+cmds = [
+    "python -m ensurepip --default-pip",
+    "python -m pip install --upgrade pip setuptools wheel",
+    "python -m pip install -r backend/requirements.txt"
+]
 
 [phases.build]
 cmds = ["echo 'Building backend...'"]
