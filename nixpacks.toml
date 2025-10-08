@@ -1,15 +1,15 @@
 [phases.setup]
-nixPkgs = ["python39", "python39Packages.pip", "python39Packages.setuptools"]
+nixPkgs = ["python39", "python39Packages.pip", "python39Packages.virtualenv"]
 
 [phases.install]
 cmds = [
-    "python -m ensurepip --default-pip",
-    "python -m pip install --upgrade pip setuptools wheel",
-    "python -m pip install -r backend/requirements.txt"
+    "python -m venv /opt/venv",
+    "/opt/venv/bin/pip install --upgrade pip setuptools wheel",
+    "/opt/venv/bin/pip install -r backend/requirements.txt"
 ]
 
 [phases.build]
 cmds = ["echo 'Building backend...'"]
 
 [start]
-cmd = "cd backend && python -m uvicorn app:app --host 0.0.0.0 --port $PORT --workers 1"
+cmd = "cd backend && /opt/venv/bin/python -m uvicorn app:app --host 0.0.0.0 --port $PORT --workers 1"
