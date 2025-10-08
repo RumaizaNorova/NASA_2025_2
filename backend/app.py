@@ -113,6 +113,10 @@ def load_model():
     """Load the retrained GradientBoosting model"""
     global model, model_performance, scaler, feature_names
     
+    # Log current working directory for debugging
+    logger.info(f"Current working directory: {os.getcwd()}")
+    logger.info(f"Files in current directory: {os.listdir('.')}")
+    
     # Try multiple possible paths for model files
     possible_model_paths = [
         "results_retrained/models/gradientboosting_model.pkl",
@@ -122,11 +126,14 @@ def load_model():
     
     model_path = None
     for path in possible_model_paths:
+        logger.info(f"Checking for model at: {path} - exists: {os.path.exists(path)}")
         if os.path.exists(path):
             model_path = path
             break
     
     if not model_path:
+        logger.error(f"Current directory: {os.getcwd()}")
+        logger.error(f"Directory contents: {os.listdir('.')}")
         raise FileNotFoundError(f"Model file not found in any of these paths: {possible_model_paths}")
     
     try:
@@ -194,8 +201,8 @@ def load_model():
             perf_path = path
             break
     
-    if not os.path.exists(perf_path):
-        raise FileNotFoundError(f"Performance data not found: {perf_path}")
+    if perf_path is None:
+        raise FileNotFoundError(f"Performance data not found in any of these paths: {possible_perf_paths}")
     
     try:
         with open(perf_path, 'r') as f:
@@ -210,6 +217,9 @@ def load_data():
     
     # Try multiple possible paths for data file
     possible_data_paths = [
+        "integrated_data_sample.csv",
+        "../integrated_data_sample.csv",
+        "/app/integrated_data_sample.csv",
         "integrated_data_full.csv",
         "../integrated_data_full.csv",
         "/app/integrated_data_full.csv"
