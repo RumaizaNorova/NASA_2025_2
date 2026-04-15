@@ -2,6 +2,16 @@
 
 An interactive web application for predicting shark foraging behavior using NASA satellite data and machine learning models.
 
+## 🌐 Live Demo
+
+- **Dashboard**: https://shark-habitat-frontend.onrender.com/
+
+## ⚠️ Current Status (Known Limitations)
+
+This project is an active work-in-progress. The current model can produce **poor / unrealistic predictions** (e.g., predicting high shark presence on land). We expect to correct this with improved feature engineering, stricter geospatial constraints, and better validation.
+
+Planned improvements include experimenting with **alternative modeling approaches**, potentially including **physics-based methods** and more **specialized domain models**, in addition to further ML iteration.
+
 ## 🌟 Features
 
 - **Interactive Map**: Real-time habitat prediction with Mapbox integration
