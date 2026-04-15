@@ -25,7 +25,8 @@ const MapComponent = () => {
   const [viewState, setViewState] = useState({
     longitude: 0.0,
     latitude: 0.0,
-    zoom: 2 // Default zoom, will be updated by handleMapStyleChange
+    // Default to Earth View (globe projection) zoom.
+    zoom: 1.5
   });
   
   const [predictionData, setPredictionData] = useState(null);
@@ -40,7 +41,8 @@ const MapComponent = () => {
   const [animationInterval, setAnimationInterval] = useState(null);
   const [animationTrail, setAnimationTrail] = useState([]);
   const [currentFrame, setCurrentFrame] = useState(0);
-  const [mapStyle, setMapStyle] = useState('satellite'); // Default to flat map view
+  // Default to Earth View (globe) instead of flat map.
+  const [mapStyle, setMapStyle] = useState('map');
   
   // Update zoom when switching map styles
   const handleMapStyleChange = (newStyle) => {
