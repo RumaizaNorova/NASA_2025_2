@@ -95,10 +95,10 @@ Other runnable modules live under `ml/` and support the same `python -m ml.<modu
 ## 📊 Model Performance
 
 - **Best Model**: GradientBoosting Classifier
-- **AUC Score**: 0.972 (Excellent)
-- **Accuracy**: 92.9%
+- **AUC Score**: 0.983 (Excellent)
+- **Accuracy**: 94.8%
 - **Training Samples**: 64,942 shark tracking records
-- **Features**: 27 environmental and temporal features
+- **Features**: 28 environmental and temporal features
 
 ## 🛠️ Architecture
 
@@ -142,7 +142,7 @@ Other runnable modules live under `ml/` and support the same `python -m ml.<modu
 ├── docker-compose.yml       # Thin wrapper: includes deploy/docker-compose.yml (Compose 2.20+)
 ├── docker-compose.prod.yml  # Thin wrapper: includes deploy/docker-compose.prod.yml
 ├── requirements.txt         # Python deps for the ml/ pipeline
-└── results_full/            # Trained models and metrics (created locally, often gitignored)
+└── results_retrained/       # Trained models + metrics (used by deployed API)
 ```
 
 ## 🔧 API Endpoints
@@ -209,7 +209,7 @@ This project is **React + FastAPI**. It is **not** a Streamlit app; Streamlit wo
 
 | Piece | Good options | Notes |
 |--------|----------------|--------|
-| **API + model** | [Render](https://render.com), [Railway](https://railway.app), [Fly.io](https://fly.io) | Long‑running Python process, load `results_full/` and `data/integrated_data_full.csv` (or attach storage). Repo hints: `render.yaml`, `railway.json`, `Procfile`, `nixpacks.toml`. |
+| **API + model** | [Render](https://render.com), [Railway](https://railway.app), [Fly.io](https://fly.io) | Long‑running Python process, load `results_retrained/` and `data/integrated_data_full.csv` (or attach storage). Repo hints: `render.yaml`, `railway.json`, `Procfile`, `nixpacks.toml`. |
 | **Static React app** | [Netlify](https://www.netlify.com), [Vercel](https://vercel.com) | Build `frontend/` → publish `frontend/build`. Set `REACT_APP_API_URL` to your **public API base URL** and `REACT_APP_MAPBOX_TOKEN`. Repo hint: `netlify.toml`. |
 
 **Vercel alone** is a weak fit for this **backend** (big model + pandas in one process). Typical pattern: **Vercel or Netlify for the site**, **Render/Railway/Fly for the API**.

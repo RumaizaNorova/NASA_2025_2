@@ -607,15 +607,26 @@ async def get_model_performance():
     try:
         performance = []
         for model_name, metrics in model_performance.items():
+            # Support both legacy format (classification_report) and current retrained format
+            # (top-level accuracy + foraging_* metrics).
             if 'classification_report' in metrics:
                 report = metrics['classification_report']
                 performance.append(ModelPerformance(
                     model_name=model_name,
-                    auc_score=metrics['auc_score'],
-                    accuracy=report['accuracy'],
-                    precision=report['weighted avg']['precision'],
-                    recall=report['weighted avg']['recall'],
-                    f1_score=report['weighted avg']['f1-score']
+                    auc_score=float(metrics.get('auc_score', 0.0)),
+                    accuracy=float(report.get('accuracy', 0.0)),
+                    precision=float(report.get('weighted avg', {}).get('precision', 0.0)),
+                    recall=float(report.get('weighted avg', {}).get('recall', 0.0)),
+                    f1_score=float(report.get('weighted avg', {}).get('f1-score', 0.0))
+                ))
+            else:
+                performance.append(ModelPerformance(
+                    model_name=model_name,
+                    auc_score=float(metrics.get('auc_score', 0.0)),
+                    accuracy=float(metrics.get('accuracy', 0.0)),
+                    precision=float(metrics.get('foraging_precision', 0.0)),
+                    recall=float(metrics.get('foraging_recall', 0.0)),
+                    f1_score=float(metrics.get('foraging_f1', 0.0))
                 ))
         
         return performance
