@@ -50,12 +50,14 @@ app.add_middleware(
         # Allow Railway domains (production)
         "https://*.railway.app",
         "https://*.up.railway.app",
+        # Allow Render domains (production)
+        "https://*.onrender.com",
     ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
-    # For Railway wildcard domains, we need to use origin regex
-    allow_origin_regex=r"https://.*\.railway\.app|https://.*\.up\.railway\.app",
+    # For wildcard domains, use origin regex
+    allow_origin_regex=r"https://.*\.railway\.app|https://.*\.up\.railway\.app|https://.*\.onrender\.com",
 )
 
 # Global variables for model and data
