@@ -109,6 +109,12 @@ dist/
 *.nc
 *.hdf5
 
+# Keep essential JSON configs tracked
+!railway.json
+!frontend/package.json
+!frontend/package-lock.json
+!results_retrained/model_performance.json
+
 # Results and outputs
 results/
 results_*/
