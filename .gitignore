@@ -159,7 +159,11 @@ dmypy.json
 
 # NASA data directories
 nasa_data/
-data/
+
+# Local datasets (track only README + .gitkeep)
+/data/*
+!/data/README.md
+!/data/.gitkeep
 
 # Model artifacts
 models/

@@ -13,8 +13,24 @@ from scipy.interpolate import griddata
 from sklearn.neighbors import NearestNeighbors
 import joblib
 import os
+from pathlib import Path
 
 logger = logging.getLogger(__name__)
+
+
+def _default_training_data_path() -> str:
+    """Resolve training CSV for container (/app) or local repo (data/)."""
+    here = Path(__file__).resolve().parent
+    candidates = (
+        "/app/integrated_data_full.csv",
+        str(here / "data" / "integrated_data_full.csv"),
+        str(here.parent / "data" / "integrated_data_full.csv"),
+        str(here.parent / "integrated_data_full.csv"),
+    )
+    for s in candidates:
+        if os.path.isfile(s):
+            return s
+    return str(here.parent / "data" / "integrated_data_full.csv")
 
 class SatelliteDataService:
     """
@@ -22,9 +38,9 @@ class SatelliteDataService:
     Uses training data patterns to generate realistic location-specific values
     """
     
-    def __init__(self, training_data_path: str = "../integrated_data_full.csv"):
+    def __init__(self, training_data_path: Optional[str] = None):
         """Initialize the satellite data service with training data patterns"""
-        self.training_data_path = training_data_path
+        self.training_data_path = training_data_path or _default_training_data_path()
         self.training_data = None
         self.location_patterns = None
         self.temporal_patterns = None

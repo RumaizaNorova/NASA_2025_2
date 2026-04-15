@@ -225,9 +225,11 @@ def load_data():
         "integrated_data_sample.csv",
         "../integrated_data_sample.csv",
         "/app/integrated_data_sample.csv",
+        "data/integrated_data_full.csv",
+        "../data/integrated_data_full.csv",
         "integrated_data_full.csv",
         "../integrated_data_full.csv",
-        "/app/integrated_data_full.csv"
+        "/app/integrated_data_full.csv",
     ]
     
     data_path = None
