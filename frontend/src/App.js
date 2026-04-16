@@ -1,30 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import MapComponent from './components/MapComponent';
 import Dashboard from './components/Dashboard';
 import Navigation from './components/Navigation';
-import LoadingScreen from './components/LoadingScreen';
 import { SharkProvider } from './context/SharkContext';
 import { ApiProvider } from './context/ApiContext';
 import './App.css';
 
 function App() {
-  const [isLoading, setIsLoading] = useState(true);
   const [currentView, setCurrentView] = useState('map');
   const [showAIChat, setShowAIChat] = useState(false);
-
-  useEffect(() => {
-    // Simulate loading time for smooth UX
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 2000);
-
-    return () => clearTimeout(timer);
-  }, []);
-
-  if (isLoading) {
-    return <LoadingScreen />;
-  }
 
   return (
     <ApiProvider>

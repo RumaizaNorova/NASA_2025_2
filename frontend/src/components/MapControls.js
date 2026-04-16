@@ -25,6 +25,7 @@ const MapControls = ({
   animationSpeed,
   setAnimationSpeed,
   sharkTracks,
+  tracksLoadPending = false,
   onClose,
   currentFrame,
   totalFrames,
@@ -195,13 +196,13 @@ const MapControls = ({
         <div className="grid grid-cols-2 gap-2 text-xs">
           <div className="text-center">
             <div className="text-ocean-400 font-semibold">
-              {sharkTracks.length.toLocaleString()}
+              {tracksLoadPending ? '—' : sharkTracks.length.toLocaleString()}
             </div>
             <div className="text-shark-400">Tracks</div>
           </div>
           <div className="text-center">
             <div className="text-ocean-400 font-semibold">
-              {species.length}
+              {tracksLoadPending ? '—' : species.length}
             </div>
             <div className="text-shark-400">Species</div>
           </div>

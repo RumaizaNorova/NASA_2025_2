@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import InitialDataOverlay from './InitialDataOverlay';
 import { motion } from 'framer-motion';
 import { useShark } from '../context/SharkContext';
 import { 
@@ -20,10 +21,24 @@ const Dashboard = () => {
     sharkTracks, 
     species, 
     loading, 
-    error 
+    error,
+    initialDataReady,
+    retryInitialLoad,
   } = useShark();
 
   const [activeTab, setActiveTab] = useState('overview');
+
+  if (!initialDataReady) {
+    return (
+      <div className="relative h-full w-full">
+        <InitialDataOverlay
+          loading={loading && !error}
+          error={error}
+          onRetry={retryInitialLoad}
+        />
+      </div>
+    );
+  }
 
   const tabs = [
     { id: 'overview', label: 'Overview', icon: BarChart3 },

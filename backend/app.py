@@ -56,8 +56,11 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
-    # For wildcard domains, use origin regex
-    allow_origin_regex=r"https://.*\.railway\.app|https://.*\.up\.railway\.app|https://.*\.onrender\.com",
+    # For wildcard domains, use origin regex (include common static hosts)
+    allow_origin_regex=(
+        r"https://.*\.railway\.app|https://.*\.up\.railway\.app|https://.*\.onrender\.com|"
+        r"https://.*\.netlify\.app|https://.*\.vercel\.app"
+    ),
 )
 
 # Global variables for model and data

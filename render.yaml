@@ -1,3 +1,5 @@
+# Demo tip: free web services sleep when idle. Ping GET /health every ~5 min (e.g. UptimeRobot)
+# so the backend stays warm and first visitors see data faster.
 services:
   - type: web
     name: shark-habitat-backend

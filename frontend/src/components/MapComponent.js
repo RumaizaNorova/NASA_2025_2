@@ -4,6 +4,7 @@ import ReactMapGL, { Source, Layer, Marker, Popup } from 'react-map-gl';
 import { useShark } from '../context/SharkContext';
 import { apiService } from '../services/apiService';
 import MapControls from './MapControls';
+import InitialDataOverlay from './InitialDataOverlay';
 import PredictionPanel from './PredictionPanel';
 import SharkInfo from './SharkInfo';
 import { 
@@ -20,7 +21,15 @@ import {
 
 const MapComponent = () => {
   const mapRef = useRef();
-  const { sharkTracks, selectedShark, setSelectedShark, loading, error } = useShark();
+  const {
+    sharkTracks,
+    selectedShark,
+    setSelectedShark,
+    loading,
+    error,
+    initialDataReady,
+    retryInitialLoad,
+  } = useShark();
   
   const [viewState, setViewState] = useState({
     longitude: 0.0,
@@ -334,8 +343,16 @@ const MapComponent = () => {
 
   return (
     <div className="relative w-full h-full">
-      {/* Error Display */}
-      {error && (
+      {!initialDataReady && (
+        <InitialDataOverlay
+          loading={loading && !error}
+          error={error}
+          onRetry={retryInitialLoad}
+        />
+      )}
+
+      {/* Error Display (predictions / filters — not initial load) */}
+      {error && initialDataReady && (
         <div className="absolute top-20 left-1/2 transform -translate-x-1/2 z-30">
           <motion.div
             initial={{ opacity: 0, y: -20 }}
@@ -487,6 +504,7 @@ const MapComponent = () => {
               animationSpeed={animationSpeed}
               setAnimationSpeed={setAnimationSpeed}
               sharkTracks={sharkTracks}
+              tracksLoadPending={!initialDataReady}
               onClose={() => setShowControls(false)}
               currentFrame={currentFrame}
               totalFrames={getSortedTracks().length}
