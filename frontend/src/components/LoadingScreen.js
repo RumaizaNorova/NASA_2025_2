@@ -51,6 +51,15 @@ const LoadingScreen = () => {
           <p>🤖 GradientBoosting model (AUC: 0.972)</p>
           <p>🎯 92.9% accuracy on test data</p>
         </motion.div>
+
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.8, duration: 0.4 }}
+          className="mt-10 text-xs text-ocean-500"
+        >
+          Tap anywhere to continue
+        </motion.p>
       </div>
     </div>
   );

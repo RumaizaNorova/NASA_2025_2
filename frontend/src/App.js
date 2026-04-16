@@ -1,19 +1,40 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import MapComponent from './components/MapComponent';
 import Dashboard from './components/Dashboard';
 import Navigation from './components/Navigation';
+import LoadingScreen from './components/LoadingScreen';
 import { SharkProvider } from './context/SharkContext';
 import { ApiProvider } from './context/ApiContext';
 import './App.css';
 
+/** Show branded intro while API cold-starts in the background (SharkProvider stays mounted). */
+const INTRO_MS = 3200;
+
 function App() {
   const [currentView, setCurrentView] = useState('map');
   const [showAIChat, setShowAIChat] = useState(false);
+  const [showIntroSplash, setShowIntroSplash] = useState(true);
+
+  useEffect(() => {
+    const t = setTimeout(() => setShowIntroSplash(false), INTRO_MS);
+    return () => clearTimeout(t);
+  }, []);
 
   return (
     <ApiProvider>
       <SharkProvider>
+        {showIntroSplash && (
+          <button
+            type="button"
+            className="fixed inset-0 z-[200] cursor-pointer border-0 p-0 bg-transparent text-left appearance-none"
+            onClick={() => setShowIntroSplash(false)}
+            aria-label="Continue to dashboard"
+          >
+            <LoadingScreen />
+          </button>
+        )}
+
         <div className="min-h-screen bg-gradient-to-br from-shark-950 via-ocean-950 to-shark-900">
           {/* Background pattern */}
           <div className="fixed inset-0 opacity-5">
